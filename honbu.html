@@ -62,8 +62,8 @@
                 createNewOfferMain();
             ">mySDP copy</button>
       <br>
-      <textarea id="sdpInput" placeholder="Answerをここに貼り付け"
-        style="width:70%; height: 20%; font-size:40%;" value=""></textarea>
+      <textarea id="sdpInput" placeholder="Answerをここに貼り付け" style="width:70%; height: 20%; font-size:40%;"
+        value=""></textarea>
       <button style="
                 background:rgb(255,255,255);
                 color:rgb(0,0,0);
@@ -92,8 +92,7 @@
   </div>
 </body>
 <script>
-  var d = [document.getElementById("d1"),
-  document.getElementById("d2")]
+  var d = [document.getElementById("d1"),document.getElementById("d2")]
   var shuffleArray = arr => arr.sort(() => Math.random() - Math.random());
   var ok = console.log
   var teams = []
@@ -188,7 +187,7 @@
       rank++
 
 
-      text += `<li style="list-style-type: none;border: min(0.5vw,0.5vh) solid rgb(140 140 140);">${rank - wait},${n}     ${o[n]}pt`
+      text += `<li style="list-style-type: none;border: min(0.5vw,0.5vh) solid rgb(140 140 140);">${rank - wait},${n}     ${o[n] / 2}pt`
       befor = o[n]
     }
     document.getElementById("rank").innerHTML = text
@@ -211,6 +210,7 @@
 
     dataChannelMain.onopen = (event) => {
       console.log('Data channel for main board opened');
+      alert("接続完了")
     };
 
     dataChannelMain.onmessage = (event) => {
@@ -250,26 +250,40 @@
     } else {
       //alert("Please paste the Answer SDP into the text area.");
     }
-    document.getElementById('sdpInput').value=""
+    document.getElementById('sdpInput').value = ""
   }
 
   // 試合結果に基づいてチームのポイントを更新する関数
+
   function updateTeamPoints(winningTeamName, winningTeamScore, losingTeamName, losingTeamScore) {
-    if (!(winningTeamName in teams.map(n => n.name))) teams.push({ name: winningTeamName, point: 0 })
-    if (!(losingTeamName in teams.map(n => n.name))) teams.push({ name: losingTeamName, point: 0 })
-
-    if (winningTeamScore == losingTeamScore) {
-      teams[teams.map(n => n.name).indexOf(winningTeamName)].point += 0.5
-      teams[teams.map(n => n.name).indexOf(losingTeamName)].point += 0.5
+    // チームが存在しない場合、初期ポイント0で追加
+    if (!(winningTeamName in teams)) {
+      teams.push( { name: winningTeamName, point: 0 });
     }
-    else {
-      teams[teams.map(n => n.name).indexOf(winningTeamName)].point += 1
+    if (!(losingTeamName in teams)) {
+      teams.push( { name: losingTeamName, point: 0 });
     }
 
-    //ranking(); // ランキングを更新
-    matching(); // マッチングを更新
-    //alert(`試合結果を受信しました: ${winningTeamName} ${winningTeamScore} - ${losingTeamName} ${losingTeamScore}`);
+    // スコアに基づいてポイントを更新
+    if (winningTeamScore === losingTeamScore) {
+      // 引き分けの場合、両チームに1ポイント
+      teams[teams.map(n=>n.name).indexOf(winningTeamName)].point += 1;
+      teams[teams.map(n=>n.name).indexOf(losingTeamName)].point += 1;
+    } else {
+      // 勝利チームに2ポイント
+      teams[teams.map(n=>n.name).indexOf(winningTeamName)].point += 2;
+    }
+
+    // 必要に応じて、ランキングやマッチングの更新関数を呼び出す
+    //ranking(); // ランキングを更新する関数が別途定義されている場合
+    matching(); // マッチングを更新する関数が別途定義されている場合
+
+    // アラートメッセージ（デバッグ用など）
+    // alert(`試合結果を受信しました: ${winningTeamName} ${winningTeamScore} - ${losingTeamName} ${losingTeamScore}`);
+
+    console.log("現在のチームポイント:", teams); // デバッグ用に現在のチームポイントを表示
   }
+
 
 </script>
 
