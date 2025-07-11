@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+<meta charset="UTF-8">
+<title> 審判ボード </title>
+<style>
+* {
+overflow: scroll;
+touch-action: none;
+-ms-touch-action: none;
+}
+</style>
+</head>
+
+
+<body>
+<div style="position: absolute;height: min(62.5vw,100vh); width: min(160vh,100vw);font-size: min(6.25vw,10vh);">
+<canvas id="dummy" style="display:none;"width="1600"height="1000"></canvas>
+<div id="canvas" style="
+touch-action: none;
+-ms-touch-action: none;
+height: 100%;width: 100%;
+position: absolute;
+top: 0%;
+left: 0%;
+background: rgb(0, 0, 0);
+">
+<div id="sign" style="
+display: none;
+position:absolute;
+z-index:calc(infinity);
+width: 100%;height:100%;">
+<canvas width="1600" height="1000" id="signCanvas" style="
+position:absolute;
+width: 100%;height:100%;
+background:rgb(255,255,255);"></canvas>
+<button style="background:rgba(100,100,100,0.5);position:absolute;font-size: 10vh;"
+onclick="ctx.beginPath();ctx.fillStyle='rgb(255,255,255)';ctx.fillRect(0,0,1600,1000)">clear</button>
+<button style="position:absolute;font-size: 10vh;right:0%;bottom: 0%;background:rgba(100,100,100,0.5)" onclick='
+signImages.push(ctx.getImageData(0,0,1600,1000));
+/*canvas.toDataURL("image/png")
+let link = document.createElement("a");
+link.href = canvas.toDataURL("image/png");
+link.download = "test.png";
+link.click();*/
+ctx.beginPath();ctx.fillStyle="rgb(255,255,255)";
+ctx.fillRect(0,0,1600,1000);'>ok</button>
+</div>
+
+
+<div id="lTeamName" style="
+text-align: center;
+background: rgb(0, 0, 255);
+width: 22.5%;
+height: 15%;
+position: absolute;
+top: 2%;
+left: 2%;
+color: rgb(255, 255, 255);
+font-size:60%;
+overflow: scroll;
+margin: 0;
+">
+チーム1
+</div>
+<div id="mainTimer" style="
+text-align: center;
+background: rgb(0, 0, 0);
+width: 15%;
+height: 13%;
+position: absolute;
+top: 3%;
+left: 24.5%;
+color: rgb(255, 255, 255);
+border: 0.5vh solid rgb(255,0,0);font-size:80%;
+" onclick="stopping=!stopping">
+10:00
+</div>
+<div id='rTeamName' style="
+text-align: center;
+background: rgb(255, 255, 0);
+width: 22.5%;
+height: 15%;
+position: absolute;
+top: 2%;
+left: 40.5%;
+color: rgb(0, 0, 0);
+font-size:60%;
+overflow: scroll;
+margin: 0;
+">
+チーム2
+</div>
+
+
+<div id="lPoint" style="
+text-align: center;
+background: rgb(100, 100, 100);
+width: 30%;
+height: 50%;
+position: absolute;
+top: 20%;
+left: 2%;
+color: rgb(255, 255, 255);
+font-size: 300%;
+" onclick="
+speakVoice(((coatChange)?team2Name:team1Name)+ 'の得点')
+if(!coatChange)team1Point++
+else team2Point+=1">
+100
+</div>
+<div id="rPoint" style="
+text-align: center;
+background: rgb(100, 100, 100);
+width: 30%;
+height: 50%;
+position: absolute;
+top: 20%;
+left: 33%;
+color: rgb(255, 255, 255);
+font-size: 300%;
+" onclick="
+speakVoice(((coatChange)?team1Name:team2Name)+ 'の得点')
+if(coatChange)team1Point++
+else team2Point+=1">
+100
+</div>
+
+
+<div style="
+text-align: center;
+background: rgb(100, 100, 100);
+width: 20%;
+height: 20%;
+position: absolute;
+top: 75%;
+left: 2%;
+color: rgb(255, 255, 255);
+font-size: 150%;
+" onclick="if(!coatChange)team1Point+=-1
+else team2Point+=-1">
+<<<
+</div>
+<div style="
+text-align: center;
+background: rgb(100, 100, 100);
+width: 20%;
+height: 20%;
+position: absolute;
+top: 75%;
+left: 43%;
+color: rgb(255, 255, 255);
+font-size: 150%;
+" onclick="if(coatChange)team1Point+=-1
+else team2Point+=-1" r>
+<<<
+</div>
+
+
+<div id="startButton" style="
+text-align: center;
+background: rgb(255, 0, 0);
+width: 20%;
+height: 9.5%;
+position: absolute;
+top: 85%;
+left: 22.5%;
+color: rgb(255, 255, 255);
+font-size: 75%;
+" onclick="
+stopping=false
+playingGame=!playingGame
+time=60*timeList[(shortVar?1:0)][0]
+if(playingGame)speakVoice ('スタート')
+team1Point=team2Point=0
+phase=0
+">
+start
+</div>
+<div id="season" style="
+text-align: center;
+background: rgb(255, 0, 0);
+width: 20%;
+height: 9.5%;
+position: absolute;
+top: 75%;
+left: 22.5%;
+color: rgb(255, 255, 255);
+font-size: 70%;
+" onclick="coatChange=!coatChange;
+var [a,b]=[team1Name,team2Name];
+[team2Name,team1Name]=[a,b]
+var [a,b]=[team1Point,team2Point];
+[team1Point,team2Point]=[b,a]">
+前半
+</div>
+
+
+<div style="
+background: rgb(255, 0, 0);
+width: 30%;
+height: 15%;
+position: absolute;
+top: 2%;
+left: 65%;
+color: rgb(255, 255, 255);
+font-size: 125%;
+">
+1
+<div id="timer1" style="
+text-align: center;
+background: rgb(0, 0, 0);
+width: 69%;
+height: 98%;
+position: absolute;
+top: 1%;
+left: 30%;
+color: rgb(255, 255, 255);
+font-size: 100%;
+" onclick="
+var num=1
+if(timersFlag[num-1]){
+timers[num-1]=shortVar?30:60
+timersFlag[num-1]=false
+}else{
+timers[num-1]=shortVar?30:60
+timersFlag[num-1]=true}
+">
+60
+</div>
+</div>
+<div style="
+background: rgb(0, 255, 0);
+width: 30%;
+height: 15%;
+position: absolute;
+top: 18%;
+left: 65%;
+color: rgb(255, 255, 255);
+font-size: 125%;
+" onclick="
+var num=2
+if(timersFlag[num-1]){
+timers[num-1]=shortVar?30:60
+timersFlag[num-1]=false
+}else{
+timers[num-1]=shortVar?30:60
+timersFlag[num-1]=true}
+">
+2
+<div id="timer2" style="
+text-align: center;
+background: rgb(0, 0, 0);
+width: 69%;
+height: 98%;
+position: absolute;
+top: 1%;
+left: 30%;
+color: rgb(255, 255, 255);
+font-size: 100%;
+">
+60
+</div>
+</div>
+<div style="
+background: rgb(0, 0, 255);
+width: 30%;
+height: 15%;
+position: absolute;
+top: 34%;
+left: 65%;
+color: rgb(255, 255, 255);
+font-size: 125%;
+" onclick="
+var num=3
+if(timersFlag[num-1]){
+timers[num-1]=shortVar?30:60
+timersFlag[num-1]=false
+}else{
+timers[num-1]=shortVar?30:60
+timersFlag[num-1]=true}
+">
+3
+<div id="timer3" style="
+text-align: center;
+background: rgb(0, 0, 0);
+width: 69%;
+height: 98%;
+position: absolute;
+top: 1%;
+left: 30%;
+color: rgb(255, 255, 255);
+font-size: 100%;
+">
+60
+</div>
+</div>
+<div style="
+background: rgb(255, 0, 255);
+width: 30%;
+height: 15%;
+position: absolute;
+top: 50%;
+left: 65%;
+color: rgb(255, 255, 255);
+font-size: 125%;
+" onclick="
+var num=4
+if(timersFlag[num-1]){
+timers[num-1]=shortVar?30:60
+timersFlag[num-1]=false
+}else{
+timers[num-1]=shortVar?30:60
+timersFlag[num-1]=true}
+">
+4
+<div id="timer4" style="
+text-align: center;
+background: rgb(0, 0, 0);
+width: 69%;
+height: 98%;
+position: absolute;
+top: 1%;
+left: 30%;
+color: rgb(255, 255, 255);
+font-size: 100%;
+">
+60
+</div>
+</div>
+<div style="
+text-align: center;
+background: rgb(100, 100, 100);
+width: 30%;
+height: 9%;
+position: absolute;
+top: 67%;
+left: 65%;
+color: rgb(255, 255, 255);
+font-size: 75%;
+" onclick="
+for(var n of [0,1,2,3]){
+timers[n]=shortVar?30:60
+timersFlag[n]=false
+}
+">
+reset-all-timer
+</div>
+<div id="result" style="
+font-size:20vh;
+color:rgb(255,255,255);
+text-align: center;
+position:absolute;
+z-index:9999;
+background:rgb(0,0,0);
+width:100%;height:100%;display:none;" onclick="
+result.style.display='none'"></div>
+
+</div>
+<div id="setting" style="
+display: none;
+touch-action: none;
+-ms-touch-action: none;
+height: 100%;width: 100%;
+position: absolute;
+top: 0%;
+left: 0%;
+background: rgb(0, 0, 0);
+font-size: 100%;
+color: rgb(255, 255, 255);
+">
+team1-name:<input style="font-size: 100%;height:8%;width:30%;"id="settingTeam1Name" value= "チーム1"  /><br />
+team2-name:<input style="font-size: 100%;height:8%;width:30%;"id="settingTeam2Name" value= "チーム2"  /><br />
+<button style="font-size: 50%;height:8%;width:30%;"id="settingFightTime" style="height:2em;width:10em;"
+onclick="shortVar=!shortVar">long-version</button><br /> <br>
+<div id="rtcPanel" style="
+font-size:60%;
+width: 30%;
+height: 40%; /* 適宜調整 */
+color: white;
+">
+<button style="
+background:rgb(255,255,255);
+color:rgb(0,0,0);
+height:20%;
+width:90%;
+font-size:50%;
+" onclick="processOfferAndCreateAnswerShinpan();">mySDP copy</button>
+<textarea id="offerInputShinpan" placeholder= "相手のSDPをここに貼り付け"  style="width:90%; height:20%; font-size:40%;"value=""></textarea>
+<!--<button style="
+background:rgb(255,255,255);
+color:rgb(0,0,0);
+height:20%;
+width:90%;
+font-size:50%;
+" onclick="setOfferShinpan()"> SDPセット </button>-->
+</div>
+</div>
+<div style="
+text-align: center;
+background: rgb(100, 100, 100);
+width: 30%;
+height: 15%;
+position: absolute;
+top: 80%;
+left: 65%;
+color: rgb(255, 255, 255);
+font-size: 120%;
+display: block;
+" onclick="openningSetting=!openningSetting">
+setting
+</div></div>
+<script>
+var signImages = new Array()
+var signAll = document.getElementById("sign")
+var dummy=document.getElementById("dummy")
+var dummyC=dummy.getContext("2d")
+
+// WebRTC関連のグローバル変数
+let peerConnectionShinpan;
+let dataChannelShinpan; // データチャネル
+
+const configuration = {
+    iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+};
+
+// Offerを受け取り、Answerを生成し、クリップボードにコピー
+async function processOfferAndCreateAnswerShinpan() {
+    peerConnectionShinpan = new RTCPeerConnection(configuration);
+
+    peerConnectionShinpan.onicecandidate = (event) => {
+        if (event.candidate) {
+            console.log('Referee ICE candidate: ', event.candidate);
+        } else {
+            // All ICE candidates have been gathered
+            const answer = peerConnectionShinpan.localDescription.sdp;
+            navigator.clipboard.writeText(answer).then(() => {
+                //alert("Answer SDP copied to clipboard! Share this with the main board.");
+            }).catch(err => {
+                console.error('Could not copy text: ', err);
+            });
+        }
+    };
+
+    // データチャネルの受信
+    peerConnectionShinpan.ondatachannel = (event) => {
+        dataChannelShinpan = event.channel;
+        dataChannelShinpan.onopen = (event) => {
+            console.log('Data channel for referee board opened');
+        };
+        dataChannelShinpan.onmessage = (event) => {
+            // 審判ボードメインからはデータを受信しない（一方通行のため）
+            console.log("Unexpected message received on referee board:", event.data);
+        };
+        dataChannelShinpan.onclose = () => console.log('Data channel for referee board closed');
+        dataChannelShinpan.onerror = (error) => console.error('Data channel error on referee board:', error);
+    };
+
+    const offerInput = document.getElementById('offerInputShinpan').value;
+    if (offerInput) {
+        const remoteDesc = new RTCSessionDescription({
+            type: 'offer',
+            sdp: offerInput
+        });
+        await peerConnectionShinpan.setRemoteDescription(remoteDesc);
+        const answer = await peerConnectionShinpan.createAnswer();
+        await peerConnectionShinpan.setLocalDescription(answer);
+    } else {
+        //alert("Please paste the Offer SDP from the main board into the text area.");
+    }
+}
+
+// Offerをセット
+async function setOfferShinpan() {
+    const offerInput = document.getElementById('offerInputShinpan').value;
+    if (offerInput) {
+        const remoteDesc = new RTCSessionDescription({
+            type: 'offer',
+            sdp: offerInput
+        });
+        await peerConnectionShinpan.setRemoteDescription(remoteDesc);
+        // Offerをセットした後、Answerを生成し、ローカルにセット
+        const answer = await peerConnectionShinpan.createAnswer();
+        await peerConnectionShinpan.setLocalDescription(answer);
+        //alert("Offer SDP set and Answer generated. Please copy the Answer to the main board!");
+    } else {
+        //alert("Please paste the Offer SDP into the text area.");
+    }
+}
+
+// 試合結果を審判ボードメインに送信する関数
+function sendGameResult(team1Name, team1Point, team2Name, team2Point) {
+    if (dataChannelShinpan && dataChannelShinpan.readyState === 'open') {
+        let winningTeam = "";
+        let winningTeamPoints = 0;
+        let losingTeam = "";
+        let losingTeamPoints = 0;
+
+        if (team1Point > team2Point) {
+            winningTeam = team1Name;
+            winningTeamPoints = team1Point;
+            losingTeam = team2Name;
+            losingTeamPoints = team2Point;
+        } else if (team2Point > team1Point) {
+            winningTeam = team2Name;
+            winningTeamPoints = team2Point;
+            losingTeam = team1Name;
+            losingTeamPoints = team1Point;
+        } else {
+            // Draw
+            winningTeam = team1Name; // For draw, we can send both as "winning" with their score
+            winningTeamPoints = team1Point;
+            losingTeam = team2Name;
+            losingTeamPoints = team2Point;
+        }
+
+        const resultData = {
+            winningTeam: winningTeam,
+            winningTeamPoints: winningTeamPoints,
+            losingTeam: losingTeam,
+            losingTeamPoints: losingTeamPoints,
+            isDraw: team1Point === team2Point
+        };
+        dataChannelShinpan.send(JSON.stringify(resultData));
+        console.log("Game result sent:", resultData);
+    } else {
+        console.warn("Data channel is not open. Cannot send game result.");
+    }
+}
+
+
+var speakVoice = (text) => {
+var a = new SpeechSynthesisUtterance(text)
+SpeechSynthesisUtterance.lang = 'ja-JP';
+SpeechSynthesisUtterance.volume = '1.0';
+window.speechSynthesis.speak(a);
+}
+var stopping = false
+var result = document.getElementById("result")
+var timeList = [[10, 5, 10], [5, 2.5, 5]]
+timeList = [[0.05, 0.05, 0.05]]
+var phase = 0
+var phaseName = ["first half", "break", "latter half"]
+var time = 60 * 10
+var mainTimer = document.getElementById("mainTimer")
+var settingFightTime = document.getElementById("settingFightTime")
+var shortVar = false
+var beforeTimersTime = 0
+var timers = [60, 60, 60, 60]
+var timersFlag = [false, false, false, false]
+var timerDis = []
+var team1Name =  "チーム1" , team2Name =  "チーム2"
+var coatChange = false
+var team1Point, team2Point
+team1Point = team2Point = 0
+for (n of [1, 2, 3, 4]) {
+timerDis.push(document.getElementById("timer" + n))
+}
+var settingTeam1Name = document.getElementById("settingTeam1Name"),
+settingTeam2Name = document.getElementById("settingTeam2Name")
+var openningSetting = false
+var setting = document.getElementById("setting")
+var season = document.getElementById("season")
+var lPointWriter, rPointWriter
+lPointWriter = document.getElementById("lPoint")
+rPointWriter = document.getElementById("rPoint")
+var lTeamName, rTeamName
+lTeamName = document.getElementById("lTeamName")
+rTeamName = document.getElementById("rTeamName")
+var playingGame = false
+var startButton = document.getElementById('startButton')
+setInterval(async () => {
+startButton.innerHTML = playingGame ? 'finish' : 'start'
+var min = Math.trunc(time / 60)
+var sec = time % 60
+if (min.toString().length == 1) min = "0" + min
+if (sec.toString().length == 1) sec = "0" + sec
+mainTimer.innerHTML = min + ":" + sec
+settingFightTime.innerHTML = (!shortVar ? "long" : "short") + "-version"
+for (var n of [0, 1, 2, 3]) {
+timerDis[n].innerHTML = timers[n]
+}
+if ((Date.now() - beforeTimersTime) > 1000) {
+if (playingGame && !stopping) {
+time--
+if (time == 0) {
+phase++
+time = 60 * timeList[(shortVar ? 1 : 0)][phase]
+if (phase == 1) {
+coatChange = !coatChange
+} if (phase == 3) {
+playingGame = false
+result.style.display = "block"
+var text = ""
+if (team1Point == team2Point) {
+text = "draw"
+} else {
+text = ((team1Point > team2Point) ?
+team1Name : team2Name) + " win"
+}
+speakVoice(text)
+result.innerHTML = text
+
+// 試合終了時に結果を送信
+sendGameResult(team1Name, team1Point, team2Name, team2Point);
+
+time = 60 * timeList[(shortVar ? 1 : 0)][0]
+
+phase = 0
+coatChange = !coatChange
+await new Promise((resolve) => {
+var a = setInterval(() => {
+if (result.style.display == "none") { resolve() }
+})
+})
+signImages = []
+signAll.style.display = "block"
+ctx.fillStyle='rgb(255,255,255)';ctx.fillRect(0,0,1600,1000)
+await new Promise((resolve) => {
+var a = setInterval(() => {
+if (signImages.length == 4) { resolve() }
+})
+})
+
+ctx.font = "160px sans-serif"
+ctx.fillStyle = "rgb(0,0,0)"
+ctx.textAlign = "center";
+ctx.fillText(`:`, 800, 200)
+ctx.fillText(`:`, 800, 400)
+ctx.fillText(team1Name, 400, 200,800)
+ctx.fillText(team2Name, 1200, 200,800)
+ctx.fillText(team1Point, 400, 400,800)
+ctx.fillText(team2Point, 1200, 400,800)
+
+
+team1Point = team2Point = 0
+/*
+for (var n of [0,1,2,3]) {
+dummyC.putImageData(signImages[n], 0, 0)
+ctx.drawImage(dummy,400*n,750,400,250)
+}*/
+var n=0
+ctx.lineWidth = 10;
+var cl=["rgb(0,0,0)","rgb(0,0,0)","rgb(0,0,255)","rgb(255,255,0)"]
+ctx.fillText( "各サイン" ,800,600)
+var nl=[ "主審" , "副審" , "青側" , "黄側" ]
+ctx.font = "50px sans-serif"
+var a=setInterval(()=>{
+ctx.textAlign = "center";
+ctx.fillStyle = ctx.strokeStyle =cl[n];
+ctx.fillText(nl[n],(400*n)+200,700,400)
+dummyC.putImageData(signImages[n], 0, 0)
+ctx.drawImage(dummy,400*n,750,400,250)
+ctx.strokeRect(5+(400*n),750, 390, 250);
+n++
+if(n==4){
+clearInterval(a)
+download()
+}
+})
+signAll.style.display="none"
+}
+}
+}
+beforeTimersTime = Date.now()
+timers.forEach((n, m) => {
+if (timersFlag[m]) {
+timers[m]--
+if (timers[m] == -1) {
+speakVoice( "ロボット"  + (m + 1) +  "復帰" )
+timers[m] = "finish"
+timersFlag[m] = false
+}
+}
+})
+}
+lPointWriter.innerHTML = (!coatChange) ? team1Point : team2Point
+rPointWriter.innerHTML = (coatChange) ? team1Point : team2Point
+lTeamName.innerHTML = (!coatChange) ? team1Name : team2Name
+rTeamName.innerHTML = (coatChange) ? team1Name : team2Name
+lTeamName.style.background = (!coatChange) ? "rgb(0,0,255)" : "rgb(255,255,0)"
+lTeamName.style.color = (!coatChange) ? "rgb(255,255,255)" : "rgb(0,0,0)"
+rTeamName.style.background = (coatChange) ? "rgb(0,0,255)" : "rgb(255,255,0)"
+rTeamName.style.color = (coatChange) ? "rgb(255,255,255)" : "rgb(0,0,0)"
+season.innerHTML = phaseName[phase]
+setting.style.display = (openningSetting) ? "block" : "none"
+if (openningSetting) {
+team1Name = settingTeam1Name.value
+team2Name = settingTeam2Name.value
+}
+})
+var bc = true
+var ok = console.log
+var canvas = document.getElementById("signCanvas")
+var ctx = canvas.getContext("2d")
+ctx.lineWidth = 10;
+setInterval(() => {
+if (mouse.get().click) {
+if (!bc) { ctx.beginPath() }
+ctx.lineTo(mouse.get().x * 10, mouse.get().y * 10)
+}
+if (bc) {ctx.strokeStyle="rgb(0,0,0)";ctx.stroke()}
+bc = mouse.get().click
+});
+var download = () => {
+let canvas = document.getElementById("signCanvas");
+
+let link = document.createElement("a");
+link.href = canvas.toDataURL("image/png");
+link.download =  "試合結果.png" ;
+link.click();
+};
+ctx.fillStyle='rgb(255,255,255)';ctx.fillRect(0,0,1600,1000)
+
+class Mouse {
+    constructor() {
+        this.main = document.getElementById("signCanvas");
+        this.mouse = {
+            x: 0,
+            y: 0,
+            w: 1 / 9999 ** 99999,
+            h: 1 / 9999 ** 99999,
+            click: false,
+            endP: [1 / 9999 ** 99999, 1 / 9999 ** 99999],
+            startP: [1 / 9999 ** 99999, 1 / 9999 ** 99999],
+        };
+        this.mouseposition = (e) => {
+            if (this.pId == e.pointerId) {
+                this.mouse.x =
+                    this.mouse.endP[0] =
+                    this.mouse.startP[0] =
+                    (e.clientX / this.main.getBoundingClientRect().width) *
+                    1.6 *
+                    100;
+                this.mouse.y =
+                    this.mouse.endP[1] =
+                    this.mouse.startP[1] =
+                    (e.clientY / this.main.getBoundingClientRect().height) * 100;
+            }
+        };
+        this.pId;
+        this.another = () => { };
+        this.main.addEventListener("pointermove", this.mouseposition);
+        this.main.addEventListener("pointerdown", (e) => {
+            if (this.mouse.click == false) {
+                this.pId = e.pointerId;
+                this.mouseposition(e);
+            }
+        });
+        this.main.addEventListener("pointerdown", (e) => {
+            this.mouse.click = true;
+        });
+        this.main.addEventListener("pointerup", (e) => {
+            if (this.pId == e.pointerId) {
+                this.mouse.click = false;
+            }
+        });
+        this.main.addEventListener("pointerleave", (e) => {
+            if (this.pId == e.pointerId) {
+                this.mouse.click = false;
+            }
+        });
+    }
+    get() {
+        return this.mouse;
+    }
+}
+var mouse = new Mouse()
+</script>
+</body>
+</html>
