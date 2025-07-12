@@ -258,10 +258,20 @@
 
   function updateTeamPoints(winningTeamName, winningTeamScore, losingTeamName, losingTeamScore) {
     // チームが存在しない場合、初期ポイント0で追加
-    if (!(winningTeamName in teams)) {
+    //ok(winningTeamName,teams.map(n=>n.name))
+    var inCopy=(l,o)=>{
+      var t=false
+      for(var n of l){
+        if(n==o){
+          t=true
+        }
+      }
+      return t
+    }
+    if (!inCopy(teams.map(n=>n.name),winningTeamName)) {
       teams.push( { name: winningTeamName, point: 0 });
     }
-    if (!(losingTeamName in teams)) {
+    if (!inCopy(teams.map(n=>n.name),losingTeamName)) {
       teams.push( { name: losingTeamName, point: 0 });
     }
 
@@ -282,8 +292,9 @@
     // アラートメッセージ（デバッグ用など）
     // alert(`試合結果を受信しました: ${winningTeamName} ${winningTeamScore} - ${losingTeamName} ${losingTeamScore}`);
 
-    console.log("現在のチームポイント:", teams); // デバッグ用に現在のチームポイントを表示
+    //console.log("現在のチームポイント:", teams); // デバッグ用に現在のチームポイントを表示
   }
+
 
 
 </script>
