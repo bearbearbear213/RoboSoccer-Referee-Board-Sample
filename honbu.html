@@ -60,7 +60,7 @@
                 width:50%;
                 font-size:100%" onclick="
                 createNewOfferMain();
-            ">mySDP copy</button>
+            ">mySDP copy</button><textarea id="Vsdp" readonly placeholder="このサイトのSDPが表示されます"></textarea>
       <br>
       <textarea id="sdpInput" placeholder="Answerをここに貼り付け" style="width:70%; height: 20%; font-size:40%;"
         value=""></textarea>
@@ -225,6 +225,7 @@
       } else {
         // All ICE candidates have been gathered
         const offer = peerConnectionMain.localDescription.sdp;
+        document.getElementById("Vsdp").value=offer
         navigator.clipboard.writeText(offer).then(() => {
           //alert("Offer SDP copied to clipboard! Share this with the referee board.");
         }).catch(err => {
