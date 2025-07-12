@@ -6,7 +6,6 @@
 <title> 審判ボード </title>
 <style>
 * {
-overflow: scroll;
 touch-action: none;
 -ms-touch-action: none;
 }
@@ -386,7 +385,7 @@ color:rgb(0,0,0);
 height:20%;
 width:90%;
 font-size:50%;
-" onclick="processOfferAndCreateAnswerShinpan();">mySDP copy</button>
+" onclick="processOfferAndCreateAnswerShinpan();">mySDP copy</button><textarea id="Vsdp" readonly placeholder="このサイトのSDPが表示されます"></textarea>
 <textarea id="offerInputShinpan" placeholder= "相手のSDPをここに貼り付け"  style="width:90%; height:20%; font-size:40%;"value=""></textarea>
 <!--<button style="
 background:rgb(255,255,255);
@@ -435,6 +434,7 @@ async function processOfferAndCreateAnswerShinpan() {
         } else {
             // All ICE candidates have been gathered
             const answer = peerConnectionShinpan.localDescription.sdp;
+            document.getElementById("Vsdp").value=answer
             navigator.clipboard.writeText(answer).then(() => {
                 //alert("Answer SDP copied to clipboard! Share this with the main board.");
             }).catch(err => {
