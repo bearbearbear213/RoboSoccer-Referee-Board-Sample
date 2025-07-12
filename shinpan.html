@@ -584,12 +584,12 @@ timerDis[n].innerHTML = timers[n]
 if ((Date.now() - beforeTimersTime) > 1000) {
 if (playingGame && !stopping) {
 time--
-if (time == 0) {
+if ((time == 0)||((team1Name=="dummy")||(team2Name=="dummy"))) {
 phase++
 time = 60 * timeList[(shortVar ? 1 : 0)][phase]
-if (phase == 1) {
+if ((phase == 1)&&(!((team1Name=="dummy")||(team2Name=="dummy")))) {
 coatChange = !coatChange
-} if (phase == 3) {
+} if ((phase == 3)||((team1Name=="dummy")||(team2Name=="dummy"))) {
 playingGame = false
 result.style.display = "block"
 var text = ""
