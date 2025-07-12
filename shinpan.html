@@ -590,6 +590,10 @@ time = 60 * timeList[(shortVar ? 1 : 0)][phase]
 if ((phase == 1)&&(!((team1Name=="dummy")||(team2Name=="dummy")))) {
 coatChange = !coatChange
 } if ((phase == 3)||((team1Name=="dummy")||(team2Name=="dummy"))) {
+if((team1Name=="dummy")||(team2Name=="dummy")){
+    if((team1Name=="dummy")){team1Point=0;team2Point=1}
+    if((team2Name=="dummy")){team1Point=1;team2Point=0}
+}
 playingGame = false
 result.style.display = "block"
 var text = ""
