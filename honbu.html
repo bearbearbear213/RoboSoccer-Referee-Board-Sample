@@ -271,7 +271,7 @@
     if (!inCopy(teams.map(n=>n.name),winningTeamName)) {
       teams.push( { name: winningTeamName, point: 0 });
     }
-    if (!inCopy(teams.map(n=>n.name),losingTeamName)) {
+    if (!(losingTeamName=="dummy")&&(!inCopy(teams.map(n=>n.name),losingTeamName))) {
       teams.push( { name: losingTeamName, point: 0 });
     }
 
