@@ -602,8 +602,6 @@ team1Name : team2Name) + " win"
 speakVoice(text)
 result.innerHTML = text
 
-// 試合終了時に結果を送信
-sendGameResult(team1Name, team1Point, team2Name, team2Point);
 
 time = 60 * timeList[(shortVar ? 1 : 0)][0]
 
@@ -634,7 +632,7 @@ ctx.fillText(team1Point, 400, 400,800)
 ctx.fillText(team2Point, 1200, 400,800)
 
 
-team1Point = team2Point = 0
+
 /*
 for (var n of [0,1,2,3]) {
 dummyC.putImageData(signImages[n], 0, 0)
@@ -657,6 +655,9 @@ n++
 if(n==4){
 clearInterval(a)
 download()
+// 試合終了時に結果を送信
+sendGameResult(team1Name, team1Point, team2Name, team2Point);
+team1Point = team2Point = 0
 }
 })
 signAll.style.display="none"
