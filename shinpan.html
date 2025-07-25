@@ -589,6 +589,11 @@ phase++
 time = 60 * timeList[(shortVar ? 1 : 0)][phase]
 if ((phase == 1)&&(!((team1Name=="dummy")||(team2Name=="dummy")))) {
 coatChange = !coatChange
+coatChange=!coatChange;
+var [a,b]=[team1Name,team2Name];
+[team2Name,team1Name]=[a,b]
+var [a,b]=[team1Point,team2Point];
+[team1Point,team2Point]=[b,a]
 } if ((phase == 3)||((team1Name=="dummy")||(team2Name=="dummy"))) {
 if((team1Name=="dummy")||(team2Name=="dummy")){
     if((team1Name=="dummy")){team1Point=0;team2Point=1}
@@ -611,6 +616,11 @@ time = 60 * timeList[(shortVar ? 1 : 0)][0]
 
 phase = 0
 coatChange = !coatChange
+coatChange=!coatChange;
+var [a,b]=[team1Name,team2Name];
+[team2Name,team1Name]=[a,b]
+var [a,b]=[team1Point,team2Point];
+[team1Point,team2Point]=[b,a]
 await new Promise((resolve) => {
 var a = setInterval(() => {
 if (result.style.display == "none") { resolve() }
